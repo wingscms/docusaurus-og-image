@@ -1,4 +1,3 @@
-
 import { readFileSync } from 'fs';
 import marked from 'marked';
 import { sanitizeHtml } from './sanitizer';
@@ -11,15 +10,23 @@ const rglr = readFileSync(`${__dirname}/../_fonts/Inter-Regular.woff2`).toString
 const bold = readFileSync(`${__dirname}/../_fonts/Inter-Bold.woff2`).toString('base64');
 const mono = readFileSync(`${__dirname}/../_fonts/Vera-Mono.woff2`).toString('base64');
 
+function getFontSize(text: string) {
+    const minSize = 100
+    const maxSize = 200
+    const scaleFactor = 20
+    const minStringLength = 8
+    const adjustedLength = text.length - minStringLength
+    const scaledFontSize = maxSize - (adjustedLength > 0 ? adjustedLength : 0) * scaleFactor
+    return `${(scaledFontSize > minSize ? scaledFontSize : minSize).toString()}px` 
+}
+
 function getCss(theme: string, fontSize: string) {
     let background = 'white';
     let foreground = 'black';
-    let radial = 'lightgray';
 
     if (theme === 'dark') {
         background = 'black';
         foreground = 'white';
-        radial = 'dimgray';
     }
     return `
     @font-face {
@@ -45,24 +52,12 @@ function getCss(theme: string, fontSize: string) {
 
     body {
         background: ${background};
-        background-image: radial-gradient(circle at 25px 25px, ${radial} 2%, transparent 0%), radial-gradient(circle at 75px 75px, ${radial} 2%, transparent 0%);
         background-size: 100px 100px;
         height: 100vh;
         display: flex;
         text-align: center;
         align-items: center;
         justify-content: center;
-    }
-
-    code {
-        color: #D400FF;
-        font-family: 'Vera';
-        white-space: pre-wrap;
-        letter-spacing: -5px;
-    }
-
-    code:before, code:after {
-        content: '\`';
     }
 
     .logo-wrapper {
@@ -104,27 +99,32 @@ function getCss(theme: string, fontSize: string) {
 }
 
 export function getHtml(parsedReq: ParsedRequest) {
-    const { text, theme, md, fontSize, images, widths, heights } = parsedReq;
+    const { title, theme, md, siteTitle, logo } = parsedReq;
     return `<!DOCTYPE html>
 <html>
     <meta charset="utf-8">
     <title>Generated Image</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        ${getCss(theme, fontSize)}
+        ${getCss(theme, getFontSize(title))}
     </style>
     <body>
         <div>
-            <div class="spacer">
-            <div class="logo-wrapper">
-                ${images.map((img, i) =>
-                    getPlusSign(i) + getImage(img, widths[i], heights[i])
-                ).join('')}
+            <div class="spacer" />
+            <div class="heading">
+            ${emojify(
+                md ? marked(title) : sanitizeHtml(title)
+                )}
             </div>
-            <div class="spacer">
-            <div class="heading">${emojify(
-                md ? marked(text) : sanitizeHtml(text)
-            )}
+            <div class="spacer" />
+            <div class="logo-wrapper">
+            ${getImage(logo)}
+            </div>
+            <div class="spacer" />
+            <div class="heading">
+            ${emojify(
+                md ? marked(siteTitle) : sanitizeHtml(siteTitle)
+                )}
             </div>
         </div>
     </body>
@@ -139,8 +139,4 @@ function getImage(src: string, width ='auto', height = '225') {
         width="${sanitizeHtml(width)}"
         height="${sanitizeHtml(height)}"
     />`
-}
-
-function getPlusSign(i: number) {
-    return i === 0 ? '' : '<div class="plus">+</div>';
 }
