@@ -8,5 +8,6 @@ export interface ParsedRequest {
     md: boolean;
     logo: string;
     siteTitle: string;
+    version: string;
     docusaurusStamp: boolean;
 }
