@@ -3,21 +3,28 @@ import { parse } from 'url';
 import { ParsedRequest } from './types';
 
 export function parseRequest(req: IncomingMessage) {
-    console.log('HTTP ' + req.url);
     const { pathname, query } = parse(req.url || '/', true);
-    console.log(query)
-    const { title, siteTitle, logo, theme, md, docusaurusStamp } = (query || {});
+    const {
+        title,
+        siteTitle,
+        logo,
+        theme,
+        md,
+        version,
+        docusaurusStamp
+    } = (query || {});
 
     if (Array.isArray(title) ||
         Array.isArray(siteTitle) ||
         Array.isArray(logo) ||
         Array.isArray(theme) ||
-        Array.isArray(md)) {
+        Array.isArray(md) ||
+        Array.isArray(version) ||
+        Array.isArray(docusaurusStamp)) {
         throw new Error('Received multiple parameters of same type');
     }
     
     const arr = (pathname || '/').slice(1).split('.');
-    console.log(arr)
     let extension = '';
     let text = '';
     if (arr.length === 0) {
@@ -36,8 +43,8 @@ export function parseRequest(req: IncomingMessage) {
         md: md === '1' || md === 'true',
         siteTitle: siteTitle || 'Docusaurus Site',
         logo: logo || 'https://docusaurus.io/img/docusaurus.svg',
+        version: version || '',
         docusaurusStamp: docusaurusStamp === '1' || docusaurusStamp === 'true',
-
     };
     return parsedRequest;
 }
