@@ -11,6 +11,8 @@ export function parseRequest(req: IncomingMessage) {
         theme,
         md,
         version,
+        authorName,
+        authorImage,
         docusaurusStamp
     } = (query || {});
 
@@ -20,6 +22,8 @@ export function parseRequest(req: IncomingMessage) {
         Array.isArray(theme) ||
         Array.isArray(md) ||
         Array.isArray(version) ||
+        Array.isArray(authorName) ||
+        Array.isArray(authorImage) ||
         Array.isArray(docusaurusStamp)) {
         throw new Error('Received multiple parameters of same type');
     }
@@ -43,6 +47,8 @@ export function parseRequest(req: IncomingMessage) {
         md: md === '1' || md === 'true',
         siteTitle: siteTitle || 'Docusaurus Site',
         logo: logo || 'https://docusaurus.io/img/docusaurus.svg',
+        authorName: authorName || '',
+        authorImage: authorImage || '',
         version: version || '',
         docusaurusStamp: docusaurusStamp === '1' || docusaurusStamp === 'true',
     };
